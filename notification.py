@@ -4,11 +4,15 @@ from firebase_admin import credentials, messaging
 import json
 import time
 from flask import jsonify, request
+from collections import defaultdict
+from datetime import datetime, timedelta
 
+# Inicialização do Firebase
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 app = f.Flask(__name__)
 
+# Variáveis Globais
 last_send_time = 0
 notification_interval = 300  # 5 minutos em segundos
 
@@ -30,11 +34,47 @@ def fetch_history():
         data = []
         with open("data.json", "r") as f:
             lines = f.readlines()
-            for line in lines[-50:]:
+            for line in lines[-600:]:
                 data.append(json.loads(line))
         return jsonify({"data": data})
     except FileNotFoundError:
         return jsonify({"status": "error", "message": "data.json not found"}), 404
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/fetch-aggregated-history', methods=["GET"])
+def fetch_aggregated_history():
+    try:
+        aggregated_data = []
+        vibration_data = defaultdict(list)
+        
+        # Agrupar os dados em intervalos de 5 minutos
+        with open("data.json", "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                data = json.loads(line)
+                timestamp = datetime.fromtimestamp(data["timestamp"])
+                interval_key = timestamp.replace(minute=timestamp.minute - timestamp.minute % 5, second=0, microsecond=0)
+                vibration_data[interval_key].append(data["vibration"])
+
+        now = datetime.now()
+        interval_start = now.replace(minute=now.minute - now.minute % 5, second=0, microsecond=0)
+
+        for i in range(12):  # Última 1 hora (12 intervalos de 5 minutos)
+            interval_end = interval_start + timedelta(minutes=5)
+            if interval_start in vibration_data:
+                interval_values = vibration_data[interval_start]
+                if interval_values:
+                    avg_vibration = sum(interval_values) / len(interval_values)
+                    aggregated_data.append({
+                        "intervalStart": interval_start.strftime("%Y-%m-%d %H:%M:%S"),
+                        "intervalEnd": interval_end.strftime("%Y-%m-%d %H:%M:%S"),
+                        "average_vibration": avg_vibration
+                    })
+            interval_start -= timedelta(minutes=5)
+
+        aggregated_data.reverse()  # Ordena do mais antigo para o mais recente
+        return jsonify({"data": aggregated_data})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
