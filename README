@@ -30,8 +30,8 @@ Este projeto consiste em um sistema de monitoramento de vibração de máquinas,
 1. Clone o repositório:
 
    ```sh
-   git clone https://github.com/seu-usuario/seu-repositorio.git
-   cd seu-repositorio
+   git clone https://github.com/jumpercs/tractian_sensor_simulation.git
+   cd tractian_sensor_simulation
    ```
 
 2. Crie um ambiente virtual e ative-o:
