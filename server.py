@@ -8,10 +8,10 @@ async def handler(websocket, path):
         try:
             data = json.loads(message)
             print(f"Received data: {data}")
-
             store_data(data)
-
-            if data["vibration"] > 100:
+            # Check each vibration component individually
+            vibration = data["vibration"]
+            if vibration["x"] > 100 or vibration["y"] > 100 or vibration["z"] > 100:
                 print("Alert: High vibration detected!")
                 await send_notification()
         except json.JSONDecodeError:

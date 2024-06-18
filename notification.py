@@ -34,7 +34,7 @@ def fetch_history():
         data = []
         with open("data.json", "r") as f:
             lines = f.readlines()
-            for line in lines[-600:]:
+            for line in lines[-60:]:
                 data.append(json.loads(line))
         return jsonify({"data": data})
     except FileNotFoundError:
