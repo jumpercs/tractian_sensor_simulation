@@ -119,10 +119,6 @@ Para expor seu servidor local à internet para testes e desenvolvimento, utilize
 
 3. O Ngrok fornecerá uma URL pública que você poderá usar para acessar seu servidor Flask remotamente.
 
-## Contribuição
-
-Sinta-se à vontade para abrir issues e pull requests para melhorias e correções.
-
 ## Licença
 
 Este projeto está licenciado sob a licença MIT. Consulte o arquivo `LICENSE` para obter mais informações.
